@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workzo: Client Management for Freelancers | Nathan Dinh</title>
+    <meta name="description" content="Workzo is a client-work platform for freelancers, built by Nathan Dinh. Discovery, proposals, extra costs and invoicing on one shared, dated record.">
+    <link rel="canonical" href="https://nathandinh.com/pages/featured_projects/workzo.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Workzo: Client Management for Freelancers | Nathan Dinh">
+    <meta property="og:description" content="Workzo is a client-work platform for freelancers, built by Nathan Dinh. Discovery, proposals, extra costs and invoicing on one shared, dated record.">
+    <meta property="og:url" content="https://nathandinh.com/pages/featured_projects/workzo.html">
+    <meta property="og:image" content="https://nathandinh.com/public/documents/workzo-social-card-v3.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="Workzo: Client Management, Made Simple.">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="icon" href="../../public/icons/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="../../public/styles.css">
+</head>
+<body>
+    <main class="project-page">
+        <img class="project-image" src="../../public/documents/workzo-social-card-v3.png" width="1200" height="630" alt="Workzo: Client Management, Made Simple. Clients, proposals, projects, and invoices in one place, with every change on the record.">
+
+        <h1>Workzo</h1>
+        <p><a class="project-link" href="https://workzo.ca">workzo.ca</a></p>
+
+        <p>
+            Workzo is a client-work platform for freelancers. It follows a project from the first
+            conversation to the final invoice: discovery, proposals, approved extra costs, documents
+            and invoicing all sit on one shared, dated record that both the freelancer and the client
+            can see. Clients can take part signed in or as a guest.
+        </p>
+        <p>
+            It's a production SaaS with a Nuxt 4 and TypeScript front end and a modular .NET 10
+            backend built with domain-driven design. PostgreSQL row-level security protects the data,
+            sign-in is passwordless with role-based access, and Stripe handles billing. It runs in
+            Docker containers behind Nginx and Cloudflare, and GitHub Actions runs the checks before
+            each deploy.
+        </p>
+
+        <h2>Why I built it</h2>
+        <p>
+            I wanted to build and run a real product from start to finish, not just ship features
+            inside someone else's system. As the founder and only developer, I make every call, from
+            the product and architecture to billing, privacy and deployment, and I do it on a small
+            budget.
+        </p>
+
+        <h2>The problem I was solving</h2>
+        <p>
+            Freelancers often end up absorbing the cost when a client project drifts. When the scope
+            grows, it's hard to show what was agreed, when it was agreed, and who approved it.
+        </p>
+        <p>
+            Workzo puts all of that on one dated record that both sides can see, so extra costs are
+            approved before they're billed and neither side has to rely on memory.
+        </p>
+
+        <h2>What I learned</h2>
+        <ul>
+            <li><strong>Designing around domains:</strong> splitting the backend into modules such as billing, documents, identity and projects, while keeping them in one deployable application.</li>
+            <li><strong>Handling money safely:</strong> making Stripe webhook processing idempotent and reconciling billing automatically, because the same event can arrive more than once.</li>
+            <li><strong>Securing data at the source:</strong> enforcing access rules in the database with row-level security, not only in application code.</li>
+            <li><strong>Running production alone:</strong> keeping deployments, monitoring and infrastructure reliable as a solo developer on a low budget.</li>
+            <li><strong>Treating privacy as a requirement:</strong> letting Canadian privacy law shape how data is handled and which providers are used.</li>
+        </ul>
+
+        <a class="up-layer" href="../../index.html" aria-label="Back to portfolio"><span aria-hidden="true">&uarr;</span> Back to portfolio <kbd>Backspace</kbd></a>
+    </main>
+
+    <footer>&copy; 2026 Nathan Dinh</footer>
+
+    <!-- script.js fills this with the links on this page. -->
+    <nav class="side-nav" aria-label="Links on this page">
+        <ul></ul>
+    </nav>
+
+    <script src="../../public/script.js"></script>
+</body>
+</html>

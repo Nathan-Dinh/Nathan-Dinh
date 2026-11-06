@@ -1,0 +1,430 @@
+/* ---------- Design tokens ---------- */
+:root {
+    color-scheme: light;
+
+    /* Colors */
+    --bg: #ffffff;
+    --surface: #ffffff;
+    --text: #1f1d1a;
+    --muted: #6b655c;
+    --line: #d9d3c8;
+    --link-selected: #000080; /* Links use the browser's default color until hovered or selected. */
+
+    /* Spacing: every margin, padding, and gap below uses this scale.
+       1  inside small things: tag height, a key's sides, a short list gap
+       2  closely related items: tag to tag, icon to label, heading to its text
+       3  separate blocks of text, button sides, panel padding
+       4  a heading to its content, group to group
+       5  inside cards, around large images
+       6  section to section
+       7  the top and bottom of the page */
+    --space-1: 0.25rem;
+    --space-2: 0.5rem;
+    --space-3: 1rem;
+    --space-4: 1.5rem;
+    --space-5: 2rem;
+    --space-6: 3rem;
+    --space-7: 4.5rem;
+
+    /* Widths. All page content shares the same left and right edges. */
+    --content-width: min(1100px, 100% - 2 * var(--space-3));
+    --reading-width: min(800px, 100% - 2 * var(--space-3));
+    --card-w: min(680px, 84vw);
+
+    /* Height of one row in the navigation panel. */
+    --row: 2.25rem;
+}
+
+/* ---------- Base ---------- */
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding-bottom: var(--space-4);
+    background: var(--bg);
+    color: var(--text);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+}
+
+/* Selection is shown by darkening links, not by a border around them. */
+:focus-visible {
+    outline: none;
+}
+
+/* Keeps a keyboard-selected link from landing right against the edge of the screen. */
+a {
+    scroll-margin-block: var(--space-4);
+    text-underline-offset: 0.2em;
+}
+
+a:hover,
+a:focus,
+.card:hover a,
+.card:focus a {
+    color: var(--link-selected);
+    text-decoration-thickness: 2px;
+}
+
+hr {
+    width: var(--content-width);
+    margin: var(--space-6) auto;
+    border: 0;
+    border-top: 1px solid var(--line);
+}
+
+h1,
+h2 {
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    text-box-trim: both;
+    text-box-edge: cap alphabetic;
+}
+
+h1 {
+    margin: 0 0 var(--space-3);
+    font-size: clamp(2.25rem, 6vw, 3.5rem);
+}
+
+h2 {
+    width: var(--content-width);
+    margin: 0 auto var(--space-4);
+    font-size: clamp(1.5rem, 3vw, 2rem);
+}
+
+kbd {
+    padding: 0 var(--space-1);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 0.875em;
+}
+
+/* ---------- Header ---------- */
+header {
+    width: var(--content-width);
+    margin: 0 auto;
+    padding-top: var(--space-7);
+}
+
+.abstract {
+    margin: 0;
+    color: var(--muted);
+    font-size: 1.125rem;
+}
+
+.abstract + .abstract {
+    margin-top: var(--space-3);
+}
+
+/* Icon inside a line of text. Kept shorter than the line so the spacing stays even. */
+.inline-icon {
+    height: 1.4em;
+    vertical-align: -0.35em;
+}
+
+.socials {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1) var(--space-4);
+    margin-top: var(--space-3);
+}
+
+.socials a {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.socials img {
+    width: 1.125rem;
+    height: 1.125rem;
+}
+
+/* ---------- Mode instructions ---------- */
+.mode-help {
+    width: var(--content-width);
+    margin: var(--space-4) auto 0;
+    padding: var(--space-3);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    color: var(--muted);
+    font-size: 0.9375rem;
+}
+
+.mode-help p {
+    margin: 0;
+}
+
+.mode-help ul {
+    margin: var(--space-1) 0;
+    padding-left: var(--space-4);
+}
+
+.mode-help strong {
+    color: var(--text);
+}
+
+/* ---------- Carousel ---------- */
+/* Every card sits in the same grid cell, so the stage is as tall as the tallest card. */
+.carousel-stage {
+    display: grid;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-4) 0;
+    overflow: hidden;
+    cursor: grab;
+    touch-action: pan-y;
+    -webkit-user-select: none;
+    user-select: none;
+    mask-image: linear-gradient(to right, transparent, #000 var(--space-4), #000 calc(100% - var(--space-4)), transparent);
+}
+
+/* With one card there's nothing to drag to. */
+.carousel-stage:has(.card:only-child) {
+    cursor: default;
+}
+
+.card {
+    position: relative;
+    grid-area: 1 / 1;
+    width: var(--card-w);
+    overflow: hidden;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: transform 0.45s ease, opacity 0.45s ease;
+}
+
+.card.is-active {
+    cursor: inherit;
+}
+
+/* While dragging, cards follow the pointer directly instead of animating. */
+.carousel-stage.is-dragging,
+.carousel-stage.is-dragging .card {
+    cursor: grabbing;
+}
+
+.carousel-stage.is-dragging .card {
+    transition: none;
+}
+
+.card.is-hidden {
+    pointer-events: none;
+}
+
+.card-image,
+.project-image {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.card-image {
+    border-bottom: 1px solid var(--line);
+}
+
+.card-body {
+    padding: clamp(var(--space-4), 4vw, var(--space-5));
+}
+
+.card h3 {
+    margin: 0 0 var(--space-2);
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    line-height: 1.25;
+}
+
+/* Hovering or selecting a card treats its title like a selected link, with or without a link in it. */
+.card:hover h3,
+.card:focus h3 {
+    color: var(--link-selected);
+    text-decoration: underline 2px;
+    text-underline-offset: 0.2em;
+}
+
+/* A side card's link only selects the card, like the rest of the card does. */
+.card:not(.is-active) a {
+    pointer-events: none;
+}
+
+.card p {
+    margin: 0 0 var(--space-4);
+    color: var(--muted);
+    font-size: clamp(1rem, 2vw, 1.1875rem);
+}
+
+.tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.tags li {
+    padding: var(--space-1) var(--space-3);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    font-size: clamp(0.8125rem, 1.5vw, 0.9375rem);
+}
+
+/* ---------- Project pages ---------- */
+.project-page {
+    width: var(--reading-width);
+    margin: 0 auto;
+    padding-top: var(--space-6);
+    font-size: 1.125rem;
+}
+
+.project-image {
+    margin-bottom: var(--space-5);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+}
+
+.project-page p {
+    margin: 0 0 var(--space-3);
+}
+
+.project-page ul {
+    margin: 0;
+    padding-left: var(--space-4);
+}
+
+.project-page li + li {
+    margin-top: var(--space-2);
+}
+
+/* Follows the narrower reading column rather than the home page's dividers. */
+.project-page h2 {
+    width: auto;
+    margin: var(--space-6) 0 var(--space-3);
+}
+
+.up-layer {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin-top: var(--space-6);
+    padding: var(--space-2) var(--space-3);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    font-size: 1rem;
+    text-decoration: none;
+}
+
+/* ---------- Footer ---------- */
+footer {
+    width: var(--content-width);
+    margin: var(--space-6) auto 0;
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--line);
+    color: var(--muted);
+    font-size: 0.9375rem;
+}
+
+/* Lines up with the narrower reading column. */
+.project-page ~ footer {
+    width: var(--reading-width);
+}
+
+/* ---------- Side navigation ---------- */
+/* In scroll mode only the lines show. In navigation mode they open up:
+   the lines stay put and spread apart, and each name slides out from its own line. */
+.side-nav {
+    --pop: cubic-bezier(0.34, 1.4, 0.64, 1); /* Overshoots slightly, then settles. */
+    position: fixed;
+    top: 50%;
+    left: 0;
+    z-index: 1000; /* Above the carousel cards. */
+    width: 1.75rem;
+    padding: var(--space-3) 0;
+    overflow: hidden;
+    cursor: pointer;
+    transform: translateY(-50%);
+    transition: width 0.3s var(--pop);
+}
+
+.nav-mode .side-nav {
+    /* script.js sets --label-width to the widest name. */
+    width: calc(var(--label-width) + var(--space-6));
+    cursor: default;
+}
+
+.side-nav ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.side-nav a {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    height: 0.875rem;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: height 0.3s ease;
+}
+
+.nav-mode .side-nav a {
+    height: var(--row);
+}
+
+/* The line */
+.side-nav a::before {
+    content: "";
+    flex: none;
+    width: 0.75rem;
+    border-top: 2px solid var(--muted);
+    transition: width 0.2s ease, border-color 0.2s ease;
+}
+
+body:not(.nav-mode) .side-nav:hover a::before,
+.nav-mode .side-nav a:hover::before,
+.nav-mode .side-nav a:focus::before {
+    border-color: var(--link-selected);
+}
+
+.nav-mode .side-nav a:hover::before,
+.nav-mode .side-nav a:focus::before {
+    width: 1.25rem;
+}
+
+/* The name. Screen readers still get it while it's hidden. */
+.side-nav span {
+    flex: none;
+    opacity: 0;
+    transform: translateX(calc(-1 * var(--space-3)));
+    transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.nav-mode .side-nav span {
+    opacity: 1;
+    transform: none;
+    /* Each name follows the one above it. script.js sets --index. */
+    transition: opacity 0.2s ease, transform 0.3s var(--pop);
+    transition-delay: calc(var(--index) * 35ms + 60ms);
+}
+
+.nav-mode .side-nav a:hover,
+.nav-mode .side-nav a:focus {
+    text-decoration: underline;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .card,
+    .side-nav,
+    .side-nav a,
+    .side-nav a::before,
+    .side-nav span {
+        transition: none !important;
+    }
+}

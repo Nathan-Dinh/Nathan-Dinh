@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 214" width="420" height="214" role="img" aria-label="GitHub stats">
+<style>
+    text { font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; fill: #1f1d1a; }
+    .card { fill: #ffffff; stroke: #d9d3c8; }
+    .title { font-size: 18px; font-weight: 700; }
+    .label { font-size: 14px; fill: #6b655c; }
+    .value { font-size: 14px; font-weight: 700; }
+    @media (prefers-color-scheme: dark) {
+        text { fill: #e6edf3; }
+        .card { fill: #0d1117; stroke: #30363d; }
+        .label { fill: #9198a1; }
+    }
+</style>
+<rect class="card" x="0.5" y="0.5" width="419" height="213" rx="8"/>
+<text class="title" x="24" y="38">GitHub stats</text>
+<text class="label" x="24" y="78">Commits</text><text class="value" x="396" y="78" text-anchor="end">488</text>
+<text class="label" x="24" y="110">Pull requests</text><text class="value" x="396" y="110" text-anchor="end">44</text>
+<text class="label" x="24" y="142">Repositories</text><text class="value" x="396" y="142" text-anchor="end">9 (7 public, 2 private)</text>
+<text class="label" x="24" y="174">On GitHub since</text><text class="value" x="396" y="174" text-anchor="end">June 2022</text>
+
+</svg>
