@@ -33,11 +33,20 @@
 
     /* Height of one row in the navigation panel. */
     --row: 2.25rem;
+
+    /* Smallest comfortable height for something tapped with a finger. */
+    --tap: 2.75rem;
 }
 
 /* ---------- Base ---------- */
 *, *::before, *::after {
     box-sizing: border-box;
+}
+
+/* Stops phones enlarging the text when they're turned sideways. */
+html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
 }
 
 body {
@@ -60,12 +69,25 @@ a {
     text-underline-offset: 0.2em;
 }
 
-a:hover,
 a:focus,
-.card:hover a,
 .card:focus a {
     color: var(--link-selected);
     text-decoration-thickness: 2px;
+}
+
+/* Touchscreens keep :hover on whatever was last tapped, which would look like a second selection. */
+@media (hover: hover) {
+    a:hover,
+    .card:hover a {
+        color: var(--link-selected);
+        text-decoration-thickness: 2px;
+    }
+
+    .card:hover h3 {
+        color: var(--link-selected);
+        text-decoration: underline 2px;
+        text-underline-offset: 0.2em;
+    }
 }
 
 hr {
@@ -240,7 +262,6 @@ header {
 }
 
 /* Hovering or selecting a card treats its title like a selected link, with or without a link in it. */
-.card:hover h3,
 .card:focus h3 {
     color: var(--link-selected);
     text-decoration: underline 2px;
@@ -387,15 +408,24 @@ footer {
     transition: width 0.2s ease, border-color 0.2s ease;
 }
 
-body:not(.nav-mode) .side-nav:hover a::before,
-.nav-mode .side-nav a:hover::before,
 .nav-mode .side-nav a:focus::before {
+    width: 1.25rem;
     border-color: var(--link-selected);
 }
 
-.nav-mode .side-nav a:hover::before,
-.nav-mode .side-nav a:focus::before {
-    width: 1.25rem;
+@media (hover: hover) {
+    body:not(.nav-mode) .side-nav:hover a::before {
+        border-color: var(--link-selected);
+    }
+
+    .nav-mode .side-nav a:hover::before {
+        width: 1.25rem;
+        border-color: var(--link-selected);
+    }
+
+    .nav-mode .side-nav a:hover {
+        text-decoration: underline;
+    }
 }
 
 /* The name. Screen readers still get it while it's hidden. */
@@ -414,9 +444,98 @@ body:not(.nav-mode) .side-nav:hover a::before,
     transition-delay: calc(var(--index) * 35ms + 60ms);
 }
 
-.nav-mode .side-nav a:hover,
 .nav-mode .side-nav a:focus {
     text-decoration: underline;
+}
+
+/* ---------- Smaller screens ---------- */
+/* Below this width the open navigation sits on top of the page, so the page fades back to keep
+   the names readable. It also ignores taps, so tapping it closes navigation without opening a link. */
+@media (max-width: 1200px) {
+    body > :not(.side-nav) {
+        transition: opacity 0.2s ease;
+    }
+
+    .nav-mode {
+        cursor: pointer; /* iOS Safari only sends tap events from plain elements if they have this. */
+    }
+
+    .nav-mode > :not(.side-nav) {
+        opacity: 0.12;
+        pointer-events: none;
+    }
+}
+
+/* ---------- Phones ---------- */
+@media (max-width: 600px) {
+    /* The larger steps shrink, so every page stays in proportion without changing each rule. */
+    :root {
+        --space-5: 1.5rem;
+        --space-6: 2rem;
+        --space-7: 2.5rem;
+    }
+
+    /* Keeps the name on one line on the smallest phones. */
+    h1 {
+        font-size: clamp(2rem, 9.5vw, 2.25rem);
+    }
+
+    .abstract,
+    .project-page {
+        font-size: 1rem;
+    }
+
+    .socials {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0 var(--space-3);
+    }
+
+    .socials a {
+        min-height: var(--tap);
+    }
+
+    /* Vertical padding on an inline link makes it easier to tap without moving the text around it. */
+    .project-link {
+        padding-block: var(--space-3);
+    }
+
+    /* The card lines up with the rest of the page, and side cards show in the gutters. */
+    .carousel-stage {
+        grid-template-columns: minmax(0, 1fr);
+        padding: 0 var(--space-3);
+        mask-image: none;
+    }
+
+    .card {
+        width: 100%;
+    }
+
+    .card-body {
+        padding: var(--space-3);
+    }
+
+    .tags li {
+        padding: var(--space-1) var(--space-2);
+    }
+
+    /* A shorter line keeps clear of the text, and its name starts at the page's left edge. */
+    .side-nav a::before {
+        width: 0.5rem;
+    }
+}
+
+/* ---------- Touchscreens ---------- */
+/* Based on the device rather than the width, so a narrow desktop window keeps its keyboard help. */
+@media (hover: none) and (pointer: coarse) {
+    :root {
+        --row: var(--tap);
+    }
+
+    .mode-help > :not(.touch-help),
+    .up-layer kbd {
+        display: none;
+    }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -424,7 +543,8 @@ body:not(.nav-mode) .side-nav:hover a::before,
     .side-nav,
     .side-nav a,
     .side-nav a::before,
-    .side-nav span {
+    .side-nav span,
+    body > :not(.side-nav) {
         transition: none !important;
     }
 }

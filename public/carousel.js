@@ -110,7 +110,11 @@
             }
             select(active + cardsMoved);
         } else if (finished.card) {
-            select(cards.indexOf(finished.card));
+            var index = cards.indexOf(finished.card);
+            // A finger can't easily aim for the title, so tapping the middle card opens it.
+            var opens = index === active && event.pointerType !== 'mouse';
+            select(index);
+            if (opens) finished.card.querySelector('a').click();
         }
     }
 

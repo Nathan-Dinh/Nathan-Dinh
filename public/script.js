@@ -177,6 +177,8 @@
     var selectable = options.concat(navLinks);
 
     window.addEventListener('pagehide', function () {
+        // On a touchscreen, coming back should show the page, not a faded page behind open navigation.
+        if (navMode && matchMedia('(hover: none) and (pointer: coarse)').matches) setNavMode(false);
         try {
             sessionStorage.setItem(STORAGE_KEY, selectable.indexOf(selectedElement()));
         } catch (error) {}
