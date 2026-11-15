@@ -111,8 +111,8 @@
             select(active + cardsMoved);
         } else if (finished.card) {
             var index = cards.indexOf(finished.card);
-            // A finger can't easily aim for the title, so tapping the middle card opens it.
-            var opens = index === active && event.pointerType !== 'mouse';
+            // Clicking or tapping the middle card opens its page. A side card comes to the middle first.
+            var opens = index === active;
             select(index);
             if (opens) finished.card.querySelector('a').click();
         }

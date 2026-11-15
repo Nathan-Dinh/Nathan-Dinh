@@ -3,12 +3,12 @@
     color-scheme: light;
 
     /* Colors */
-    --bg: #ffffff;
+    --bg: #ece7df;
     --surface: #ffffff;
     --text: #1f1d1a;
-    --muted: #6b655c;
-    --line: #d9d3c8;
-    --link-selected: #000080; /* Links use the browser's default color until hovered or selected. */
+    --muted: #5f594f;
+    --line: #c4bcae;
+    --link-selected: var(--text); /* Links use the browser's default color until hovered or selected, then turn the text color. */
     /* Spacing: every margin, padding, and gap below uses this scale.
        1  inside small things: tag height, a key's sides, a short list gap
        2  closely related items: tag to tag, icon to label, heading to its text
@@ -54,7 +54,11 @@ body {
     min-height: 100dvh; /* Excludes the phone's browser bars where supported. */
     margin: 0;
     padding-bottom: var(--space-4);
-    background: var(--bg);
+    /* A fine paper grain over the background color. The grain is gray noise drawn by the inline SVG,
+       kept faint so text and cards read the same as on a flat color. */
+    background-color: var(--bg);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.14'/%3E%3C/svg%3E");
+    background-size: 240px 240px;
     color: var(--text);
     font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     line-height: 1.6;
@@ -82,18 +86,6 @@ a:focus {
         color: var(--link-selected);
         text-decoration-thickness: 2px;
     }
-
-    .card:hover h3 {
-        text-decoration: underline 2px;
-        text-underline-offset: 0.2em;
-    }
-}
-
-hr {
-    width: var(--content-width);
-    margin: var(--space-3) auto var(--space-6); /* Close under the header, with room before the next section. */
-    border: 0;
-    border-top: 1px solid var(--line);
 }
 
 h1,
@@ -115,20 +107,12 @@ h2 {
     font-size: clamp(1.5rem, 3vw, 2rem);
 }
 
-kbd {
-    padding: 0 var(--space-1);
-    border: 1px solid var(--line);
-    border-radius: 4px;
-    color: var(--text);
-    font-family: inherit;
-    font-size: 0.875em;
-}
 
 /* ---------- Header ---------- */
 header {
     width: var(--content-width);
     margin: 0 auto;
-    padding-top: var(--space-4);
+    padding: var(--space-4) 0 calc(var(--space-3) + var(--space-6)); /* Room before the next section. */
 }
 
 .socials {
@@ -157,6 +141,80 @@ header {
     .socials a:hover {
         color: var(--text);
     }
+}
+
+/* The card that appears on hover or selection. script.js adds it.
+   Below the link in the header, and above it in the footer so it stays on screen. */
+.link-preview {
+    position: absolute;
+    top: calc(100% + var(--space-2));
+    left: 0;
+    z-index: 100; /* Above the project cards. */
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    width: 18rem;
+    max-width: calc(100vw - 2 * var(--gutter)); /* Never wider than the window. */
+    padding: var(--space-3);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgb(0 0 0 / 0.08);
+    color: var(--muted);
+    font-size: 0.8125rem;
+    line-height: 1.4;
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(calc(-1 * var(--space-1)));
+    /* Hiding waits for the fade to finish. */
+    transition: opacity 0.15s ease, transform 0.15s ease, visibility 0s linear 0.15s;
+}
+
+/* Room for a page screenshot to be readable. */
+.link-preview-wide {
+    width: 28rem;
+}
+
+footer .link-preview {
+    top: auto;
+    bottom: calc(100% + var(--space-2));
+    transform: translateY(var(--space-1));
+}
+
+.socials a:focus .link-preview {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    transition-delay: 0s;
+}
+
+@media (hover: hover) {
+    .socials a:hover .link-preview {
+        opacity: 1;
+        visibility: visible;
+        transform: none;
+        transition-delay: 0s;
+    }
+}
+
+.link-preview-title {
+    color: var(--text);
+    font-weight: 600;
+}
+
+.link-preview-address {
+    overflow-wrap: anywhere;
+}
+
+/* .socials img sizes the link icons, so this is more specific to win. */
+.socials .link-preview-image {
+    width: 100%;
+    height: auto;
+    margin-bottom: var(--space-2);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    opacity: 1;
 }
 
 /* A short line centred in the gap before each link after the first. */
@@ -188,15 +246,62 @@ header {
     }
 }
 
-/* ---------- Carousel ---------- */
-/* Home page sections. Headings are smaller than elsewhere, to match the compact cards and rows. */
-.home-section h2 {
-    margin-bottom: var(--space-2);
-    font-size: 1.25rem;
+/* ---------- Tabs ---------- */
+/* The home page shows one section at a time. The open tab is dark and underlined; the others are
+   gray until hovered or selected, when they turn dark too. */
+.tabs {
+    --dot-gap: var(--space-3); /* Space on each side of a dot. */
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1) calc(2 * var(--dot-gap));
+    width: var(--content-width);
+    margin: 0 auto;
 }
 
-.home-section + .home-section {
-    margin-top: var(--space-5);
+.tab {
+    position: relative;
+    min-height: var(--tap);
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--muted);
+    font: inherit;
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    cursor: pointer;
+}
+
+/* A dot in the middle of the space between two tabs. It sits outside the tab, so it isn't
+   underlined or recoloured with it, and clicks pass through it. */
+.tab + .tab::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: calc(-1 * var(--dot-gap));
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--muted);
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+}
+
+.tab[aria-selected="true"] {
+    color: var(--text);
+    text-decoration: underline 2px;
+    text-underline-offset: 0.3em;
+}
+
+.tab:focus {
+    outline: none;
+    color: var(--link-selected);
+}
+
+@media (hover: hover) {
+    .tab:hover {
+        color: var(--link-selected);
+    }
 }
 
 /* ---------- Empty sections ---------- */
@@ -217,9 +322,10 @@ header {
     font-size: 0.875rem;
 }
 
+/* ---------- Carousel ---------- */
 /* Every card sits in the same grid cell, so the stage is as tall as the tallest card.
    The stage spans the whole window so side cards can show in the gutters, but the left padding
-   puts the selected card on the page's left edge, under the heading. */
+   puts the selected card on the page's left edge, under the tabs. */
 .carousel-stage {
     --page-edge: calc((100% - var(--content-width)) / 2);
     display: grid;
@@ -246,14 +352,9 @@ header {
     width: var(--card-w);
     overflow: hidden;
     background: var(--surface);
-    border: 1px solid var(--line);
     border-radius: 12px;
     cursor: pointer;
-    transition: transform 0.45s ease, opacity 0.45s ease;
-}
-
-.card.is-active {
-    cursor: inherit;
+    transition: transform 0.45s ease, opacity 0.45s ease, translate 0.2s ease, box-shadow 0.2s ease;
 }
 
 /* While dragging, cards follow the pointer directly instead of animating. */
@@ -277,31 +378,42 @@ header {
     height: auto;
 }
 
-.card-image {
-    border-bottom: 1px solid var(--line);
+/* The card shows only its image. The title, description and tech stack stay in the page for
+   screen readers and search engines, and the title's link is what Enter and a tap open. */
+.card h3,
+.card p,
+.card .tags {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
 }
 
-.card-body {
-    padding: var(--space-3);
+/* The card has no border, so selecting it draws a dark ring just outside its edge. */
+.card:focus,
+.card:focus-within {
+    outline: 2px solid var(--text);
+    outline-offset: 2px;
 }
 
-.card h3 {
-    margin: 0 0 var(--space-2);
-    font-size: 1.125rem;
-    line-height: 1.25;
-}
+/* Hovering lifts a card slightly off the page with a soft shadow under it, like a print pinned to a
+   wall. carousel.js positions cards with transform, so the lift uses translate, which adds to it.
+   The shadow is kept short enough to fit inside the stage's padding without being cut off. */
+@media (hover: hover) {
+    .card:hover {
+        translate: 0 -4px;
+        box-shadow: 0 8px 16px rgb(0 0 0 / 0.12);
+    }
 
-/* The title reads as plain text, not a blue link. */
-.card h3 a {
-    color: inherit;
-    text-decoration: none;
-}
-
-/* Hovering or selecting a card underlines its title, so it's still clear which card is chosen. */
-.card:focus h3,
-.card:focus-within h3 {
-    text-decoration: underline 2px;
-    text-underline-offset: 0.2em;
+    /* No lifting while a drag is moving the cards. */
+    .carousel-stage.is-dragging .card {
+        translate: none;
+        box-shadow: none;
+    }
 }
 
 /* A side card's link only selects the card, like the rest of the card does. */
@@ -309,32 +421,9 @@ header {
     pointer-events: none;
 }
 
-.card p {
-    margin: 0 0 var(--space-2);
-    color: var(--muted);
-    font-size: 0.8125rem;
-    line-height: 1.5;
-}
-
-.tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-1);
-    margin: 0;
-    padding: 0;
-    list-style: none;
-}
-
-.tags li {
-    padding: 0 var(--space-2);
-    border: 1px solid var(--line);
-    border-radius: 999px;
-    font-size: 0.6875rem;
-}
-
 /* ---------- Project pages ---------- */
 /* A centred article column, narrow enough that lines stay comfortable to read.
-   The divider above gives the top spacing. */
+   The header's bottom padding gives the top spacing. */
 .project-page {
     width: min(1000px, 100% - 2 * var(--space-3));
     margin: 0 auto;
@@ -434,12 +523,6 @@ header {
     }
 }
 
-/* A quiet hint, so it doesn't compete with the label. */
-.up-layer kbd {
-    color: inherit;
-    font-size: 0.75rem;
-}
-
 /* ---------- Footer ---------- */
 /* On a short page the footer sits at the bottom of the screen: the automatic top margin takes up
    the spare space. The padding keeps a gap above it when the page is long. */
@@ -454,7 +537,6 @@ footer {
 
 .footer-bar {
     padding-top: var(--space-4);
-    border-top: 1px solid var(--line);
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -510,6 +592,15 @@ footer {
         row-gap: 0;
     }
 
+    /* The same for the three tabs, down to the narrowest phones. */
+    .tabs {
+        --dot-gap: var(--space-2);
+    }
+
+    .tab {
+        font-size: 1.125rem;
+    }
+
     .socials a,
     .up-layer {
         min-height: var(--tap);
@@ -531,22 +622,20 @@ footer {
     .card-placeholder {
         width: 100%;
     }
-
-    .card-body {
-        padding: var(--space-3);
-    }
 }
 
 /* ---------- Touchscreens ---------- */
-/* Based on the device rather than the width, so a narrow desktop window keeps its keyboard hint. */
+/* Based on the device rather than the width, so a narrow desktop window keeps its previews. */
 @media (hover: none) and (pointer: coarse) {
-    .up-layer kbd {
+    /* A tap opens the link straight away, so there's no moment to show a preview. */
+    .link-preview {
         display: none;
     }
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .card {
+    .card,
+    .link-preview {
         transition: none !important;
     }
 }

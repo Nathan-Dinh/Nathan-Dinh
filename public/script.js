@@ -5,10 +5,96 @@
     var STORAGE_KEY = 'selected:' + location.pathname.replace(/index\.html$/, '');
 
     var upLayer = document.querySelector('.up-layer'); // The home page doesn't have one.
-    // The links and project cards that Left and Right move through, in page order.
-    var options = Array.prototype.slice.call(
-        document.querySelectorAll('.socials a, .card, .project-page a')
+
+    // Hovering or selecting a social link shows a preview of where it goes.
+    // Sites can't be shown live inside another site, so the previews are saved screenshots
+    // in public/documents. LinkedIn only shows a sign-in page to visitors, so it has no screenshot.
+    var documentsFolder = new URL('documents/', document.currentScript.src);
+    var PREVIEWS = [
+        { match: /github\.com/, title: 'GitHub', detail: 'Code and repositories', screenshot: 'github-preview.png', wide: true },
+        { match: /linkedin\.com/, title: 'LinkedIn', detail: 'Work history and experience' },
+        { match: /^mailto:/, title: 'Email', detail: 'Opens your email app' },
+        { match: /\.pdf$/, title: 'Resume', detail: 'PDF, 2 pages', screenshot: 'nathan_dinh_resume-preview.png' }
+    ];
+
+    function addPreview(link) {
+        var href = link.getAttribute('href');
+        var preview = PREVIEWS.filter(function (item) { return item.match.test(href); })[0];
+        if (!preview) return;
+
+        var card = document.createElement('span');
+        card.className = 'link-preview' + (preview.wide ? ' link-preview-wide' : '');
+        card.setAttribute('aria-hidden', 'true'); // The link's own name already says where it goes.
+
+        if (preview.screenshot) {
+            var image = document.createElement('img');
+            image.className = 'link-preview-image';
+            image.src = new URL(preview.screenshot, documentsFolder).href;
+            image.alt = '';
+            card.appendChild(image);
+        }
+
+        var address = /\.pdf$/.test(href) ? null : href
+            .replace(/^mailto:/, '')
+            .replace(/^https?:\/\/(www\.)?/, '')
+            .replace(/\/$/, '');
+
+        [['title', preview.title], ['address', address], ['detail', preview.detail]].forEach(function (part) {
+            if (!part[1]) return;
+            var line = document.createElement('span');
+            line.className = 'link-preview-' + part[0];
+            line.textContent = part[1];
+            card.appendChild(line);
+        });
+
+        link.appendChild(card);
+    }
+
+    Array.prototype.forEach.call(document.querySelectorAll('.socials a'), addPreview);
+
+    // The home page shows one section at a time. Choosing a tab shows its section and puts its name
+    // in the address (#projects), so a tab can be linked to and is still open after going back.
+    // replaceState rather than a new history entry, so Back leaves the page instead of undoing tabs.
+    var tabs = Array.prototype.slice.call(document.querySelectorAll('[role="tab"]'));
+
+    function openTab(tab) {
+        tabs.forEach(function (each) {
+            var open = each === tab;
+            each.setAttribute('aria-selected', open);
+            each.tabIndex = open ? 0 : -1; // Tab reaches only the open tab, as usual for tabs.
+            document.getElementById(each.getAttribute('aria-controls')).hidden = !open;
+        });
+    }
+
+    function tabForAddress() {
+        var name = location.hash.slice(1);
+        return tabs.filter(function (tab) { return tab.dataset.hash === name; })[0];
+    }
+
+    tabs.forEach(function (tab) {
+        tab.addEventListener('click', function () {
+            openTab(tab);
+            history.replaceState(null, '', '#' + tab.dataset.hash);
+        });
+    });
+
+    window.addEventListener('hashchange', function () {
+        var tab = tabForAddress();
+        if (tab) openTab(tab);
+    });
+
+    if (tabForAddress()) openTab(tabForAddress());
+
+    // The links, tabs and project cards that Left and Right move through, in page order.
+    // Anything in a closed tab is skipped. A tab is only selected by this; Enter opens it, so
+    // Right can carry on past the tabs to the open section's cards.
+    var allOptions = Array.prototype.slice.call(
+        document.querySelectorAll('.socials a, [role="tab"], .card, .project-page a')
     );
+
+    function visibleOptions() {
+        return allOptions.filter(function (option) { return !option.closest('[hidden]'); });
+    }
 
     var scrollKey = null; // The key currently held, if any
     var scrollDirection = 1;
@@ -80,7 +166,7 @@
             if (cardLink) cardLink.click();
         } else if (key === 'ArrowLeft' || key === 'ArrowRight') {
             event.preventDefault();
-            selectOption(neighbour(options, selectedElement(), key === 'ArrowRight' ? 1 : -1));
+            selectOption(neighbour(visibleOptions(), selectedElement(), key === 'ArrowRight' ? 1 : -1));
         } else if (key === 'ArrowUp' || key === 'ArrowDown') {
             event.preventDefault(); // Replaces the browser's own, slower arrow scrolling.
             if (!event.repeat) startScrolling(key);
@@ -112,16 +198,17 @@
         window.addEventListener('resize', fitFooterName);
     }
 
-    // Remembers the selection for this tab, so coming back to a page doesn't lose it.
+    // Remembers the selection for this browser tab, so coming back to a page doesn't lose it.
+    // The open section comes back from the address first, so the same items are visible again.
     // Storage can be blocked by the browser, in which case the page just starts with nothing selected.
     window.addEventListener('pagehide', function () {
         try {
-            sessionStorage.setItem(STORAGE_KEY, options.indexOf(selectedElement()));
+            sessionStorage.setItem(STORAGE_KEY, visibleOptions().indexOf(selectedElement()));
         } catch (error) {}
     });
 
     try {
-        var saved = options[sessionStorage.getItem(STORAGE_KEY)];
+        var saved = visibleOptions()[sessionStorage.getItem(STORAGE_KEY)];
         if (saved) selectOption(saved);
     } catch (error) {}
 })();
