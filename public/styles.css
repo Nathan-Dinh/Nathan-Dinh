@@ -9,7 +9,6 @@
     --muted: #6b655c;
     --line: #d9d3c8;
     --link-selected: #000080; /* Links use the browser's default color until hovered or selected. */
-
     /* Spacing: every margin, padding, and gap below uses this scale.
        1  inside small things: tag height, a key's sides, a short list gap
        2  closely related items: tag to tag, icon to label, heading to its text
@@ -27,12 +26,10 @@
     --space-7: 4.5rem;
 
     /* Widths. All page content shares the same left and right edges. */
-    --content-width: min(1100px, 100% - 2 * var(--space-3));
-    --reading-width: min(800px, 100% - 2 * var(--space-3));
-    --card-w: min(680px, 84vw);
-
-    /* Height of one row in the navigation panel. */
-    --row: 2.25rem;
+    /* Space at each side of the window: 1rem on phones, growing to 3rem on wide screens. */
+    --gutter: clamp(var(--space-3), 4vw, var(--space-6));
+    --content-width: calc(100% - 2 * var(--gutter));
+    --card-w: min(360px, 84vw);
 
     /* Smallest comfortable height for something tapped with a finger. */
     --tap: 2.75rem;
@@ -49,7 +46,12 @@ html {
     text-size-adjust: 100%;
 }
 
+/* At least one screen tall, stacked top to bottom, so the footer can sit at the bottom. */
 body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    min-height: 100dvh; /* Excludes the phone's browser bars where supported. */
     margin: 0;
     padding-bottom: var(--space-4);
     background: var(--bg);
@@ -69,22 +71,19 @@ a {
     text-underline-offset: 0.2em;
 }
 
-a:focus,
-.card:focus a {
+a:focus {
     color: var(--link-selected);
     text-decoration-thickness: 2px;
 }
 
 /* Touchscreens keep :hover on whatever was last tapped, which would look like a second selection. */
 @media (hover: hover) {
-    a:hover,
-    .card:hover a {
+    a:hover {
         color: var(--link-selected);
         text-decoration-thickness: 2px;
     }
 
     .card:hover h3 {
-        color: var(--link-selected);
         text-decoration: underline 2px;
         text-underline-offset: 0.2em;
     }
@@ -92,7 +91,7 @@ a:focus,
 
 hr {
     width: var(--content-width);
-    margin: var(--space-6) auto;
+    margin: var(--space-3) auto var(--space-6); /* Close under the header, with room before the next section. */
     border: 0;
     border-top: 1px solid var(--line);
 }
@@ -129,80 +128,111 @@ kbd {
 header {
     width: var(--content-width);
     margin: 0 auto;
-    padding-top: var(--space-7);
-}
-
-.abstract {
-    margin: 0;
-    color: var(--muted);
-    font-size: 1.125rem;
-}
-
-.abstract + .abstract {
-    margin-top: var(--space-3);
-}
-
-/* Icon inside a line of text. Kept shorter than the line so the spacing stays even. */
-.inline-icon {
-    height: 1.4em;
-    vertical-align: -0.35em;
+    padding-top: var(--space-4);
 }
 
 .socials {
+    --divider-gap: var(--space-3); /* Space on each side of a divider. */
     display: flex;
     flex-wrap: wrap;
-    gap: var(--space-1) var(--space-4);
-    margin-top: var(--space-3);
+    gap: var(--space-1) calc(2 * var(--divider-gap));
+    font-size: 0.875rem;
 }
 
+/* Plain gray text rather than a link. Hovering or selecting one darkens it. */
 .socials a {
+    position: relative;
     display: inline-flex;
     align-items: center;
-    gap: var(--space-2);
-}
-
-.socials img {
-    width: 1.125rem;
-    height: 1.125rem;
-}
-
-/* ---------- Mode instructions ---------- */
-.mode-help {
-    width: var(--content-width);
-    margin: var(--space-4) auto 0;
-    padding: var(--space-3);
-    border: 1px solid var(--line);
-    border-radius: 8px;
+    gap: var(--space-1);
     color: var(--muted);
-    font-size: 0.9375rem;
+    text-decoration: none;
 }
 
-.mode-help p {
-    margin: 0;
-}
-
-.mode-help ul {
-    margin: var(--space-1) 0;
-    padding-left: var(--space-4);
-}
-
-.mode-help strong {
+.socials a:focus {
     color: var(--text);
 }
 
+@media (hover: hover) {
+    .socials a:hover {
+        color: var(--text);
+    }
+}
+
+/* A short line centred in the gap before each link after the first. */
+.socials a + a::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: calc(-1 * var(--divider-gap));
+    height: 1em;
+    border-left: 1px solid var(--line);
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+}
+
+/* The icons are drawn near-black. Fading them matches the gray text. */
+.socials img {
+    width: 0.875rem;
+    height: 0.875rem;
+    opacity: 0.7;
+}
+
+.socials a:focus img {
+    opacity: 1;
+}
+
+@media (hover: hover) {
+    .socials a:hover img {
+        opacity: 1;
+    }
+}
+
 /* ---------- Carousel ---------- */
-/* Every card sits in the same grid cell, so the stage is as tall as the tallest card. */
+/* Home page sections. Headings are smaller than elsewhere, to match the compact cards and rows. */
+.home-section h2 {
+    margin-bottom: var(--space-2);
+    font-size: 1.25rem;
+}
+
+.home-section + .home-section {
+    margin-top: var(--space-5);
+}
+
+/* ---------- Empty sections ---------- */
+/* Holds the place of a card until a section has some, in the same spot and size as a card. */
+.placeholder-stage {
+    padding: var(--space-4) var(--gutter);
+}
+
+.card-placeholder {
+    display: grid;
+    place-items: center;
+    width: var(--card-w);
+    aspect-ratio: 4 / 3;
+    margin: 0;
+    border: 1px dashed var(--line);
+    border-radius: 12px;
+    color: var(--muted);
+    font-size: 0.875rem;
+}
+
+/* Every card sits in the same grid cell, so the stage is as tall as the tallest card.
+   The stage spans the whole window so side cards can show in the gutters, but the left padding
+   puts the selected card on the page's left edge, under the heading. */
 .carousel-stage {
+    --page-edge: calc((100% - var(--content-width)) / 2);
     display: grid;
     align-items: center;
-    justify-content: center;
-    padding: var(--space-4) 0;
+    justify-content: start;
+    padding: var(--space-4) 0 var(--space-4) var(--page-edge);
     overflow: hidden;
     cursor: grab;
     touch-action: pan-y;
     -webkit-user-select: none;
     user-select: none;
-    mask-image: linear-gradient(to right, transparent, #000 var(--space-4), #000 calc(100% - var(--space-4)), transparent);
+    /* Earlier cards fade out across the left gutter, so the selected card itself never fades. */
+    mask-image: linear-gradient(to right, transparent, #000 var(--page-edge), #000 calc(100% - var(--space-4)), transparent);
 }
 
 /* With one card there's nothing to drag to. */
@@ -252,18 +282,24 @@ header {
 }
 
 .card-body {
-    padding: clamp(var(--space-4), 4vw, var(--space-5));
+    padding: var(--space-3);
 }
 
 .card h3 {
     margin: 0 0 var(--space-2);
-    font-size: clamp(1.5rem, 3vw, 2rem);
+    font-size: 1.125rem;
     line-height: 1.25;
 }
 
-/* Hovering or selecting a card treats its title like a selected link, with or without a link in it. */
-.card:focus h3 {
-    color: var(--link-selected);
+/* The title reads as plain text, not a blue link. */
+.card h3 a {
+    color: inherit;
+    text-decoration: none;
+}
+
+/* Hovering or selecting a card underlines its title, so it's still clear which card is chosen. */
+.card:focus h3,
+.card:focus-within h3 {
     text-decoration: underline 2px;
     text-underline-offset: 0.2em;
 }
@@ -274,33 +310,80 @@ header {
 }
 
 .card p {
-    margin: 0 0 var(--space-4);
+    margin: 0 0 var(--space-2);
     color: var(--muted);
-    font-size: clamp(1rem, 2vw, 1.1875rem);
+    font-size: 0.8125rem;
+    line-height: 1.5;
 }
 
 .tags {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--space-2);
+    gap: var(--space-1);
     margin: 0;
     padding: 0;
     list-style: none;
 }
 
 .tags li {
-    padding: var(--space-1) var(--space-3);
+    padding: 0 var(--space-2);
     border: 1px solid var(--line);
     border-radius: 999px;
-    font-size: clamp(0.8125rem, 1.5vw, 0.9375rem);
+    font-size: 0.6875rem;
 }
 
 /* ---------- Project pages ---------- */
+/* A centred article column, narrow enough that lines stay comfortable to read.
+   The divider above gives the top spacing. */
 .project-page {
-    width: var(--reading-width);
+    width: min(1000px, 100% - 2 * var(--space-3));
     margin: 0 auto;
-    padding-top: var(--space-6);
     font-size: 1.125rem;
+    line-height: 1.75;
+}
+
+.article-header {
+    margin-bottom: var(--space-5);
+}
+
+.project-page .eyebrow {
+    margin: 0 0 var(--space-3);
+    color: var(--muted);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.project-page .lead {
+    margin: 0 0 var(--space-4);
+    color: var(--muted);
+    font-size: 1.25rem;
+    line-height: 1.5;
+}
+
+/* Role, type and link in a row, set off by a line above and below. */
+.article-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3) var(--space-5);
+    margin: 0;
+    padding: var(--space-3) 0;
+    border-block: 1px solid var(--line);
+    font-size: 0.9375rem;
+    line-height: 1.5;
+}
+
+.article-meta dt {
+    color: var(--muted);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.article-meta dd {
+    margin: 0;
 }
 
 .project-image {
@@ -322,148 +405,81 @@ header {
     margin-top: var(--space-2);
 }
 
-/* Follows the narrower reading column rather than the home page's dividers. */
+/* Follows the reading column rather than the full page width that other section headings use. */
 .project-page h2 {
     width: auto;
     margin: var(--space-6) 0 var(--space-3);
+    font-size: 1.5rem;
 }
 
+/* Sits above the article. Plain gray text like the social links; hovering or selecting it darkens it. */
 .up-layer {
     display: inline-flex;
+    margin-bottom: var(--space-5);
     align-items: center;
     gap: var(--space-2);
-    margin-top: var(--space-6);
-    padding: var(--space-2) var(--space-3);
-    background: var(--surface);
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    font-size: 1rem;
-    text-decoration: none;
-}
-
-/* ---------- Footer ---------- */
-footer {
-    width: var(--content-width);
-    margin: var(--space-6) auto 0;
-    padding-top: var(--space-4);
-    border-top: 1px solid var(--line);
     color: var(--muted);
-    font-size: 0.9375rem;
-}
-
-/* Lines up with the narrower reading column. */
-.project-page ~ footer {
-    width: var(--reading-width);
-}
-
-/* ---------- Side navigation ---------- */
-/* In scroll mode only the lines show. In navigation mode they open up:
-   the lines stay put and spread apart, and each name slides out from its own line. */
-.side-nav {
-    --pop: cubic-bezier(0.34, 1.4, 0.64, 1); /* Overshoots slightly, then settles. */
-    position: fixed;
-    top: 50%;
-    left: 0;
-    z-index: 1000; /* Above the carousel cards. */
-    width: 1.75rem;
-    padding: var(--space-3) 0;
-    overflow: hidden;
-    cursor: pointer;
-    transform: translateY(-50%);
-    transition: width 0.3s var(--pop);
-}
-
-.nav-mode .side-nav {
-    /* script.js sets --label-width to the widest name. */
-    width: calc(var(--label-width) + var(--space-6));
-    cursor: default;
-}
-
-.side-nav ul {
-    margin: 0;
-    padding: 0;
-    list-style: none;
-}
-
-.side-nav a {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-    height: 0.875rem;
+    font-size: 0.875rem;
+    line-height: 1.5;
     text-decoration: none;
-    white-space: nowrap;
-    transition: height 0.3s ease;
 }
 
-.nav-mode .side-nav a {
-    height: var(--row);
-}
-
-/* The line */
-.side-nav a::before {
-    content: "";
-    flex: none;
-    width: 0.75rem;
-    border-top: 2px solid var(--muted);
-    transition: width 0.2s ease, border-color 0.2s ease;
-}
-
-.nav-mode .side-nav a:focus::before {
-    width: 1.25rem;
-    border-color: var(--link-selected);
+.up-layer:focus {
+    color: var(--text);
 }
 
 @media (hover: hover) {
-    body:not(.nav-mode) .side-nav:hover a::before {
-        border-color: var(--link-selected);
-    }
-
-    .nav-mode .side-nav a:hover::before {
-        width: 1.25rem;
-        border-color: var(--link-selected);
-    }
-
-    .nav-mode .side-nav a:hover {
-        text-decoration: underline;
+    .up-layer:hover {
+        color: var(--text);
     }
 }
 
-/* The name. Screen readers still get it while it's hidden. */
-.side-nav span {
-    flex: none;
-    opacity: 0;
-    transform: translateX(calc(-1 * var(--space-3)));
-    transition: opacity 0.15s ease, transform 0.15s ease;
+/* A quiet hint, so it doesn't compete with the label. */
+.up-layer kbd {
+    color: inherit;
+    font-size: 0.75rem;
 }
 
-.nav-mode .side-nav span {
-    opacity: 1;
-    transform: none;
-    /* Each name follows the one above it. script.js sets --index. */
-    transition: opacity 0.2s ease, transform 0.3s var(--pop);
-    transition-delay: calc(var(--index) * 35ms + 60ms);
+/* ---------- Footer ---------- */
+/* On a short page the footer sits at the bottom of the screen: the automatic top margin takes up
+   the spare space. The padding keeps a gap above it when the page is long. */
+footer {
+    width: var(--content-width);
+    margin: auto auto 0;
+    padding-top: var(--space-6);
+    color: var(--muted);
+    font-size: 0.9375rem;
+    container-type: inline-size; /* Lets the name below size itself to the footer's width. */
 }
 
-.nav-mode .side-nav a:focus {
-    text-decoration: underline;
+.footer-bar {
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--line);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2) var(--space-4);
 }
 
-/* ---------- Smaller screens ---------- */
-/* Below this width the open navigation sits on top of the page, so the page fades back to keep
-   the names readable. It also ignores taps, so tapping it closes navigation without opening a link. */
-@media (max-width: 1200px) {
-    body > :not(.side-nav) {
-        transition: opacity 0.2s ease;
-    }
+.footer-bar p {
+    margin: 0;
+    font-size: 0.875rem;
+}
 
-    .nav-mode {
-        cursor: pointer; /* iOS Safari only sends tap events from plain elements if they have this. */
-    }
-
-    .nav-mode > :not(.side-nav) {
-        opacity: 0.12;
-        pointer-events: none;
-    }
+/* The name runs the full width of the footer. script.js sets the exact size for the device's font.
+   This size is close enough on its own if the script doesn't run. */
+.footer-name {
+    width: max-content;
+    margin: var(--space-5) 0 0;
+    color: var(--text);
+    font-size: 17cqi;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.05em;
+    white-space: nowrap;
+    text-box-trim: trim-both;
+    text-box-edge: cap alphabetic;
 }
 
 /* ---------- Phones ---------- */
@@ -480,18 +496,22 @@ footer {
         font-size: clamp(2rem, 9.5vw, 2.25rem);
     }
 
-    .abstract,
     .project-page {
         font-size: 1rem;
     }
 
-    .socials {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 0 var(--space-3);
+    .project-page .lead {
+        font-size: 1.125rem;
     }
 
-    .socials a {
+    /* Narrower gaps keep all four links on one line. */
+    .socials {
+        --divider-gap: var(--space-2);
+        row-gap: 0;
+    }
+
+    .socials a,
+    .up-layer {
         min-height: var(--tap);
     }
 
@@ -507,44 +527,26 @@ footer {
         mask-image: none;
     }
 
-    .card {
+    .card,
+    .card-placeholder {
         width: 100%;
     }
 
     .card-body {
         padding: var(--space-3);
     }
-
-    .tags li {
-        padding: var(--space-1) var(--space-2);
-    }
-
-    /* A shorter line keeps clear of the text, and its name starts at the page's left edge. */
-    .side-nav a::before {
-        width: 0.5rem;
-    }
 }
 
 /* ---------- Touchscreens ---------- */
-/* Based on the device rather than the width, so a narrow desktop window keeps its keyboard help. */
+/* Based on the device rather than the width, so a narrow desktop window keeps its keyboard hint. */
 @media (hover: none) and (pointer: coarse) {
-    :root {
-        --row: var(--tap);
-    }
-
-    .mode-help > :not(.touch-help),
     .up-layer kbd {
         display: none;
     }
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .card,
-    .side-nav,
-    .side-nav a,
-    .side-nav a::before,
-    .side-nav span,
-    body > :not(.side-nav) {
+    .card {
         transition: none !important;
     }
 }

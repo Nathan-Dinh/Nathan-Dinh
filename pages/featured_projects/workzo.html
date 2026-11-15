@@ -19,11 +19,40 @@
     <link rel="stylesheet" href="../../public/styles.css">
 </head>
 <body>
-    <main class="project-page">
-        <img class="project-image" src="../../public/documents/workzo-social-card-v3.png" width="1200" height="630" alt="Workzo: Client Management, Made Simple. Clients, proposals, projects, and invoices in one place, with every change on the record.">
+    <header>
+        <nav class="socials" aria-label="Social links">
+            <a href="https://github.com/Nathan-Dinh"><img src="../../public/icons/github.svg" alt="">GitHub</a>
+            <a href="https://www.linkedin.com/in/nathandinh67/"><img src="../../public/icons/linkedin.svg" alt="">LinkedIn</a>
+            <a href="mailto:n.dinh72943@gmail.com"><img src="../../public/icons/email.svg" alt="">Email</a>
+            <a href="../../public/documents/nathan_dinh_resume.pdf"><img src="../../public/icons/resume.svg" alt="">Resume</a>
+        </nav>
+    </header>
+    <hr>
 
-        <h1>Workzo</h1>
-        <p><a class="project-link" href="https://workzo.ca">workzo.ca</a></p>
+    <main class="project-page">
+        <a class="up-layer" href="../../index.html" aria-label="Back to portfolio"><span aria-hidden="true">&larr;</span> Back to portfolio <kbd>Backspace</kbd></a>
+
+        <div class="article-header">
+            <p class="eyebrow">Case study</p>
+            <h1>Workzo</h1>
+            <p class="lead">A client-work platform for freelancers, from the first conversation to the final invoice.</p>
+            <dl class="article-meta">
+                <div>
+                    <dt>Role</dt>
+                    <dd>Founder and only developer</dd>
+                </div>
+                <div>
+                    <dt>Type</dt>
+                    <dd>Production SaaS</dd>
+                </div>
+                <div>
+                    <dt>Live site</dt>
+                    <dd><a class="project-link" href="https://workzo.ca">workzo.ca</a></dd>
+                </div>
+            </dl>
+        </div>
+
+        <img class="project-image" src="../../public/documents/workzo-social-card-v3.png" width="1200" height="630" alt="Workzo: Client Management, Made Simple. Clients, proposals, projects, and invoices in one place, with every change on the record.">
 
         <p>
             Workzo is a client-work platform for freelancers. It follows a project from the first
@@ -65,16 +94,20 @@
             <li><strong>Running production alone:</strong> keeping deployments, monitoring and infrastructure reliable as a solo developer on a low budget.</li>
             <li><strong>Treating privacy as a requirement:</strong> letting Canadian privacy law shape how data is handled and which providers are used.</li>
         </ul>
-
-        <a class="up-layer" href="../../index.html" aria-label="Back to portfolio"><span aria-hidden="true">&uarr;</span> Back to portfolio <kbd>Backspace</kbd></a>
     </main>
 
-    <footer>&copy; 2026 Nathan Dinh</footer>
-
-    <!-- script.js fills this with the links on this page. -->
-    <nav class="side-nav" aria-label="Links on this page">
-        <ul></ul>
-    </nav>
+    <footer>
+        <div class="footer-bar">
+            <nav class="socials" aria-label="Footer social links">
+                <a href="https://github.com/Nathan-Dinh"><img src="../../public/icons/github.svg" alt="">GitHub</a>
+                <a href="https://www.linkedin.com/in/nathandinh67/"><img src="../../public/icons/linkedin.svg" alt="">LinkedIn</a>
+                <a href="mailto:n.dinh72943@gmail.com"><img src="../../public/icons/email.svg" alt="">Email</a>
+                <a href="../../public/documents/nathan_dinh_resume.pdf"><img src="../../public/icons/resume.svg" alt="">Resume</a>
+            </nav>
+            <p>&copy; 2026 Nathan Dinh</p>
+        </div>
+        <p class="footer-name" aria-hidden="true">Nathan Dinh</p>
+    </footer>
 
     <script src="../../public/script.js"></script>
 </body>
