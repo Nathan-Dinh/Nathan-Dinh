@@ -4,36 +4,11 @@
     // "/" and "/index.html" are the same page, so they share one remembered selection.
     var STORAGE_KEY = 'selected:' + location.pathname.replace(/index\.html$/, '');
 
-    var sideNav = document.querySelector('.side-nav');
-    var modeLabel = document.getElementById('mode-label');
     var upLayer = document.querySelector('.up-layer'); // The home page doesn't have one.
-    // The side navigation lists the links on this page, so it can't go out of date.
-    var navLinks = Array.prototype.map.call(
-        document.querySelectorAll('.socials a, .card a, .project-page a'),
-        function (link, index) {
-            var item = document.createElement('li');
-            var navLink = document.createElement('a');
-            var name = document.createElement('span');
-            navLink.href = link.getAttribute('href');
-            name.textContent = link.getAttribute('aria-label') || link.textContent.trim();
-            name.style.setProperty('--index', index);
-            navLink.appendChild(name);
-            item.appendChild(navLink);
-            sideNav.querySelector('ul').appendChild(item);
-            return navLink;
-        }
-    );
-    // The panel opens to fit the widest name. A width of auto can't be animated.
-    sideNav.style.setProperty('--label-width', Math.max.apply(null, navLinks.map(function (navLink) {
-        return navLink.firstChild.offsetWidth;
-    })) + 'px');
     // The links and project cards that Left and Right move through, in page order.
     var options = Array.prototype.slice.call(
         document.querySelectorAll('.socials a, .card, .project-page a')
     );
-
-    var selectedNavLink = navLinks[0];
-    var navMode = false;
 
     var scrollKey = null; // The key currently held, if any
     var scrollDirection = 1;
@@ -69,19 +44,6 @@
         scrollFrame = null;
     }
 
-    // Scroll mode shows the page links as lines. Navigation mode shows their names.
-    function setNavMode(on) {
-        navMode = on;
-        stopScrolling();
-        document.body.classList.toggle('nav-mode', on);
-        if (modeLabel) modeLabel.textContent = on ? 'navigation mode' : 'scroll mode';
-        if (on) {
-            selectedNavLink.focus({ preventScroll: true });
-        } else if (sideNav.contains(document.activeElement)) {
-            document.activeElement.blur();
-        }
-    }
-
     // The next or previous item, stopping at the first and last.
     // With nothing selected yet, moving forward starts at the first item and back at the last.
     function neighbour(list, current, step) {
@@ -103,36 +65,25 @@
         (option.closest('.carousel-stage') || option).scrollIntoView({ block: 'nearest' });
     }
 
-    // Space switches mode and Escape leaves navigation mode.
-    // In scroll mode, Up and Down scroll the page, and Left and Right choose a link or card.
-    // In navigation mode, Up and Down choose a link. Enter opens whatever is selected.
-    // Backspace goes up a layer on pages that have one.
+    // Up and Down scroll the page, and Left and Right choose a link or card.
+    // Enter opens whatever is selected. Backspace goes up a layer on pages that have one.
     document.addEventListener('keydown', function (event) {
         if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
         var key = event.key;
 
-        if (key === ' ') {
-            event.preventDefault(); // Stops Space scrolling the page.
-            if (!event.repeat) setNavMode(!navMode);
-        } else if (key === 'Escape' && navMode) {
-            setNavMode(false);
-        } else if (key === 'Backspace' && upLayer && !event.repeat) {
+        if (key === 'Backspace' && upLayer && !event.repeat) {
             event.preventDefault();
             upLayer.click();
         } else if (key === 'Enter' && document.activeElement.matches('.card')) {
             // Links open on Enter by themselves. A selected card isn't a link, so it opens its own.
             var cardLink = document.activeElement.querySelector('a');
             if (cardLink) cardLink.click();
-        } else if ((key === 'ArrowLeft' || key === 'ArrowRight') && !navMode) {
+        } else if (key === 'ArrowLeft' || key === 'ArrowRight') {
             event.preventDefault();
             selectOption(neighbour(options, selectedElement(), key === 'ArrowRight' ? 1 : -1));
         } else if (key === 'ArrowUp' || key === 'ArrowDown') {
             event.preventDefault(); // Replaces the browser's own, slower arrow scrolling.
-            if (navMode) {
-                neighbour(navLinks, selectedNavLink, key === 'ArrowDown' ? 1 : -1).focus({ preventScroll: true });
-            } else if (!event.repeat) {
-                startScrolling(key);
-            }
+            if (!event.repeat) startScrolling(key);
         }
     });
 
@@ -144,48 +95,33 @@
     // The browser never reports the key coming up if the window loses focus first.
     window.addEventListener('blur', stopScrolling);
 
-    // Tabbing into the links opens navigation mode, and tabbing out closes it.
-    sideNav.addEventListener('focusin', function (event) {
-        selectedNavLink = event.target;
-        if (!navMode) setNavMode(true);
-    });
+    // Sizes the footer name to fill the footer exactly. Letters vary in width between fonts,
+    // so it's measured at a known size and scaled from there.
+    var footerName = document.querySelector('.footer-name');
 
-    sideNav.addEventListener('focusout', function (event) {
-        if (navMode && event.relatedTarget && !sideNav.contains(event.relatedTarget)) setNavMode(false);
-    });
+    function fitFooterName() {
+        footerName.style.fontSize = '100px';
+        var available = footerName.parentElement.clientWidth;
+        // Slightly under, so rounding can't push it past the edge and scroll the page sideways.
+        var natural = footerName.getBoundingClientRect().width;
+        footerName.style.fontSize = (100 * available / natural) * 0.995 + 'px';
+    }
 
-    // The lines are too small to aim at, so clicking one opens the panel rather than a page.
-    // Without this, pressing on a line would focus it and open navigation mode too early,
-    // and the rest of the click would then follow the link.
-    sideNav.addEventListener('mousedown', function (event) {
-        if (!navMode) event.preventDefault();
-    });
-
-    sideNav.addEventListener('click', function (event) {
-        if (!navMode) {
-            event.preventDefault();
-            setNavMode(true);
-        }
-    });
-
-    document.addEventListener('click', function (event) {
-        if (navMode && !sideNav.contains(event.target)) setNavMode(false);
-    });
+    if (footerName) {
+        fitFooterName();
+        window.addEventListener('resize', fitFooterName);
+    }
 
     // Remembers the selection for this tab, so coming back to a page doesn't lose it.
     // Storage can be blocked by the browser, in which case the page just starts with nothing selected.
-    var selectable = options.concat(navLinks);
-
     window.addEventListener('pagehide', function () {
-        // On a touchscreen, coming back should show the page, not a faded page behind open navigation.
-        if (navMode && matchMedia('(hover: none) and (pointer: coarse)').matches) setNavMode(false);
         try {
-            sessionStorage.setItem(STORAGE_KEY, selectable.indexOf(selectedElement()));
+            sessionStorage.setItem(STORAGE_KEY, options.indexOf(selectedElement()));
         } catch (error) {}
     });
 
     try {
-        var saved = selectable[sessionStorage.getItem(STORAGE_KEY)];
+        var saved = options[sessionStorage.getItem(STORAGE_KEY)];
         if (saved) selectOption(saved);
     } catch (error) {}
 })();
