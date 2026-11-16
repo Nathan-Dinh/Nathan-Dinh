@@ -53,7 +53,7 @@
     Array.prototype.forEach.call(document.querySelectorAll('.socials a'), addPreview);
 
     // The home page shows one section at a time. Choosing a tab shows its section and puts its name
-    // in the address (#projects), so a tab can be linked to and is still open after going back.
+    // in the address (#builds), so a tab can be linked to and is still open after going back.
     // replaceState rather than a new history entry, so Back leaves the page instead of undoing tabs.
     var tabs = Array.prototype.slice.call(document.querySelectorAll('[role="tab"]'));
 
